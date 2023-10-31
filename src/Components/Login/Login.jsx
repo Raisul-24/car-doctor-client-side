@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import login from "/images/login/login.svg"
 import { FcGoogle } from "react-icons/fc";
 import { FaTwitter, FaGithub } from "react-icons/fa6";
@@ -8,11 +8,15 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import { GithubAuthProvider } from "firebase/auth";
+import axios from "axios";
 const Login = () => {
    const [loginError, setLoginError] = useState('');
-   const [success, setSuccess] = useState('');
    const navigate = useNavigate();
    const { signIn, googleSignIn, githubSignIn, twitterSignIn } = useContext(AuthContext);
+
+   //  auto reload to fix
+   const location = useLocation();
+   console.log(location);
 
    const handleLogIn = e => {
       e.preventDefault();
@@ -24,14 +28,28 @@ const Login = () => {
       // reset
       form.reset();
       setLoginError('');
-      setSuccess('');
       if (email, password) {
          signIn(email, password)
             .then(result => {
                const loggedUser = result.user;
                console.log(loggedUser);
-               setSuccess("Log In Successfully");
-               navigate(form, { replace: true })
+               Swal.fire({
+                  position: 'center',
+                  icon: 'success',
+                  title: 'Log In Successfully',
+                  showConfirmButton: false,
+                  timer: 1500
+               })
+
+               // get access token
+               const user = { email };
+               axios.post('https://car-doctor-server-side-azp4yykah-raisuls-projects.vercel.app/jwt', user, { withCredentials: true })
+                  .then(res => {
+                     console.log(res.data);
+                     if (res.data.success) {
+                        navigate(location?.state ? location?.state : '/')
+                     }
+                  })
             })
             .catch(error => {
                const errorMessage = error.message;
@@ -42,13 +60,19 @@ const Login = () => {
    }
    const handleGoogleSignIn = () => {
       // reset
-      setSuccess('');
       setLoginError('');
       // sign up
       googleSignIn()
          .then(result => {
             console.log(result.user);
-            setSuccess('Sign In with Google Successfully');
+            Swal.fire({
+               position: 'center',
+               icon: 'success',
+               title: 'Sign In with Google Successfully',
+               showConfirmButton: false,
+               timer: 1500
+            })
+            navigate(location?.state ? location?.state : '/')
          })
          .catch(error => {
             console.log(error.message);
@@ -57,7 +81,6 @@ const Login = () => {
    }
    const handleGithubSignIn = () => {
       // reset
-      setSuccess('');
       setLoginError('');
       // sign up
       githubSignIn()
@@ -65,7 +88,14 @@ const Login = () => {
             const credential = GithubAuthProvider.credentialFromResult(result);
             // eslint-disable-next-line no-unused-vars
             const token = credential.accessToken;
-            setSuccess('Sign In with Github Successfully')
+            Swal.fire({
+               position: 'center',
+               icon: 'success',
+               title: 'Sign In with Github Successfully',
+               showConfirmButton: false,
+               timer: 1500
+            })
+            navigate(location?.state ? location?.state : '/')
          })
          .catch(error => {
             console.log(error.message);
@@ -74,13 +104,19 @@ const Login = () => {
    }
    const handleTwitterSignIn = () => {
       // reset
-      setSuccess('');
       setLoginError('');
       // sign up
       twitterSignIn()
          .then(result => {
             console.log(result.user);
-            setSuccess('Sign In with Twitter Successfully')
+            Swal.fire({
+               position: 'center',
+               icon: 'success',
+               title: 'Sign In with Twitter Successfully',
+               showConfirmButton: false,
+               timer: 1500
+            })
+            navigate(location?.state ? location?.state : '/')
          })
          .catch(error => {
             console.log(error.message);
@@ -100,20 +136,7 @@ const Login = () => {
                   </h3>
                </div>
                {
-                  loginError && Swal.fire({
-                     icon: 'error',
-                     title: 'Oops...',
-                     text: loginError
-                  })
-               }
-               {
-                  success && Swal.fire({
-                     position: 'center',
-                     icon: 'success',
-                     title: success,
-                     showConfirmButton: false,
-                     timer: 1500
-                  })
+                  loginError && <p className="text-red-500 text-center">{loginError}</p>
                }
                <form onSubmit={handleLogIn}>
                   <div className="flex flex-col gap-4 p-6">

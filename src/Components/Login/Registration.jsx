@@ -11,9 +11,8 @@ import Swal from "sweetalert2";
 import { GithubAuthProvider } from "firebase/auth";
 
 const Registration = () => {
-   const { createUser, googleSignIn, githubSignIn, twitterSignIn, } = useContext(AuthContext);
+   const { createUser,googleSignIn,githubSignIn,twitterSignIn } = useContext(AuthContext);
    const [registerError, setRegisterError] = useState(null);
-   const [success, setSuccess] = useState('');
 
    const handleRegister = e => {
       e.preventDefault()
@@ -25,16 +24,28 @@ const Registration = () => {
       console.log(newUser)
       // reset
       setRegisterError('');
-      setSuccess('');
-      // password validation
-      if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password)) {
-         return setRegisterError("Minimum eight characters, at least one letter and one number!");
+      setRegisterError('')
+      if (password.length < 6) {
+         return setRegisterError('Password should be at least 6 character');
+      }
+      else if(!/^(?=.*[A-Z])/.test(password)){
+         return setRegisterError('Password should be at least 1 Capital Letter');
+      }
+      else if(!/(?=.*[@$!%*#?&])/.test(password)){
+         return setRegisterError('Password should be at least 1 special character(@$!%*#?&)');
       }
       if (email, password) {
          createUser(email, password)
             .then(result => {
                console.log(result.user);
-               setSuccess("You have registered Successfully");
+               Swal.fire({
+                  position: 'center',
+                  icon: 'success',
+                  title: 'Your account has been successfully registered!!',
+                  showConfirmButton: false,
+                  timer: 1500
+               })
+               form.reset();
             })
             .catch(error => {
                console.log(error.message);
@@ -42,7 +53,10 @@ const Registration = () => {
             })
       }
    }
-   const handleGoogleSignIn = () => {
+      const handleGoogleSignIn = () => {
+      // reset
+      setRegisterError('');
+      // sign up
       googleSignIn()
          .then(result => {
             console.log(result.user);
@@ -60,27 +74,33 @@ const Registration = () => {
          })
    }
    const handleGithubSignIn = () => {
-      githubSignIn().then(result => {
-         const credential = GithubAuthProvider.credentialFromResult(result);
-         // eslint-disable-next-line no-unused-vars
-         const token = credential.accessToken;
-         Swal.fire({
-            position: 'top-center',
-            icon: 'success',
-            title: 'Sign In with Github Successfully!!',
-            showConfirmButton: false,
-            timer: 1500
+      // reset
+      setRegisterError('');
+      // sign up
+      githubSignIn()
+         .then(result => {
+            const credential = GithubAuthProvider.credentialFromResult(result);
+            // eslint-disable-next-line no-unused-vars
+            const token = credential.accessToken;
+            Swal.fire({
+               position: 'center',
+               icon: 'success',
+               title: 'Sign In with Github Successfully',
+               showConfirmButton: false,
+               timer: 1500
+            })
          })
-      })
          .catch(error => {
             console.log(error.message);
             setRegisterError(error.message);
          })
    }
    const handleTwitterSignIn = () => {
+      // reset
+      setRegisterError('');
+      // sign up
       twitterSignIn()
          .then(result => {
-
             console.log(result.user);
             Swal.fire({
                position: 'center',
@@ -108,20 +128,7 @@ return (
                </h3>
             </div>
             {
-               registerError && Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: registerError
-                })
-            }
-            {
-               success &&  Swal.fire({
-                  position: 'top-center',
-                  icon: 'success',
-                  title: success,
-                  showConfirmButton: false,
-                  timer: 1500
-               })
+               registerError && <p className="text-red-500 text-center">{registerError}</p>
             }
             <form onSubmit={handleRegister}>
                <div className="flex flex-col gap-4 p-6">

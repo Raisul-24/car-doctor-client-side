@@ -9,6 +9,8 @@ import Contact from "../Pages/Contact/Contact";
 import Login from "../Components/Login/Login";
 import Registration from "../Components/Login/Registration";
 import Checkout from "../Pages/Checkout/Checkout";
+import Bookings from "../Pages/Bookings/Bookings";
+import PrivateRoute from "./PrivateRoute/PrivateRoute";
 
 const router = createBrowserRouter([
    {
@@ -46,8 +48,12 @@ const router = createBrowserRouter([
       },
       {
          path: '/checkout/:id',
-         element: <Checkout></Checkout>,
-         loader: ({params}) => fetch(`http://localhost:3001/services/${params.id}`)
+         element: <PrivateRoute><Checkout></Checkout></PrivateRoute>,
+         loader: ({params}) => fetch(`https://car-doctor-server-side-beta.vercel.app/services/${params.id}`)
+      },
+      {
+         path: '/bookings',
+         element: <PrivateRoute><Bookings></Bookings></PrivateRoute>,
       }
      ]
    },
